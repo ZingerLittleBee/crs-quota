@@ -112,6 +112,11 @@ struct ConfigRowView: View {
             
             Spacer()
             
+            Button(action: openInBrowser) {
+                Image(systemName: "safari")
+            }
+            .buttonStyle(.borderless)
+            
             Button(action: onEdit) {
                 Image(systemName: "pencil")
             }
@@ -124,6 +129,13 @@ struct ConfigRowView: View {
             .buttonStyle(.borderless)
         }
         .padding(.vertical, 4)
+    }
+    
+    private func openInBrowser() {
+        let urlString = "\(config.baseURL)/admin-next/api-stats?apiId=\(config.apiId)"
+        if let url = URL(string: urlString) {
+            NSWorkspace.shared.open(url)
+        }
     }
 }
 
