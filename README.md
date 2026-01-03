@@ -2,7 +2,11 @@
 
 Language: 🇺🇸 English | [🇨🇳 简体中文](./README.zh-CN.md)
 
-A macOS menu bar app for monitoring CRS API usage quota.
+A macOS menu bar app for monitoring claude-relay-service API usage quota.
+
+## Screenshot
+
+![Overview](./snapshot/overview.png)
 
 ## Features
 

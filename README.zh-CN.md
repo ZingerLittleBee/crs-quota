@@ -2,7 +2,11 @@
 
 Language: [🇺🇸 English](./README.md) | 🇨🇳 简体中文
 
-macOS 菜单栏应用，用于监控 CRS API 使用额度。
+macOS 菜单栏应用，用于监控 claude-relay-service API 使用额度。
+
+## 截图
+
+![Overview](./snapshot/overview.png)
 
 ## 功能
 
