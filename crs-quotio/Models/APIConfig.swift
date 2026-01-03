@@ -10,6 +10,7 @@ struct APIConfig: Identifiable, Codable, Hashable {
     var name: String
     var baseURL: String
     var apiId: String
+    var showInMenuBar: Bool = true
     
     var statsURL: String {
         "\(baseURL)/apiStats/api/user-stats"

@@ -89,8 +89,15 @@ struct ConfigRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(config.name)
-                    .font(.headline)
+                HStack(spacing: 6) {
+                    Text(config.name)
+                        .font(.headline)
+                    if config.showInMenuBar {
+                        Image(systemName: "menubar.rectangle")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                }
                 Text(config.baseURL)
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -121,6 +128,7 @@ struct ConfigEditView: View {
     @State private var name: String = ""
     @State private var baseURL: String = ""
     @State private var apiId: String = ""
+    @State private var showInMenuBar: Bool = true
     
     var isValid: Bool {
         !name.isEmpty && !baseURL.isEmpty && !apiId.isEmpty
@@ -149,6 +157,9 @@ struct ConfigEditView: View {
                 
                 TextField("API ID", text: $apiId)
                     .textFieldStyle(.roundedBorder)
+                
+                Toggle("Show in Menu Bar", isOn: $showInMenuBar)
+                    .toggleStyle(.checkbox)
                 
                 if !baseURL.isEmpty && !apiId.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
@@ -185,6 +196,7 @@ struct ConfigEditView: View {
                     newConfig.name = name
                     newConfig.baseURL = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
                     newConfig.apiId = apiId
+                    newConfig.showInMenuBar = showInMenuBar
                     onSave(newConfig)
                     dismiss()
                 }
@@ -193,12 +205,13 @@ struct ConfigEditView: View {
             }
             .padding()
         }
-        .frame(width: 400, height: 320)
+        .frame(width: 400, height: 350)
         .onAppear {
             if let config = config {
                 name = config.name
                 baseURL = config.baseURL
                 apiId = config.apiId
+                showInMenuBar = config.showInMenuBar
             }
         }
     }
