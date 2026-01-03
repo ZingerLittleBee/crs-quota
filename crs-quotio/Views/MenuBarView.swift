@@ -282,10 +282,16 @@ struct StatsCardView: View {
             
             // Expiry info
             if let expiresAt = parseDate(data.expiresAt) {
-                HStack(spacing: 4) {
-                    Image(systemName: "calendar")
-                        .foregroundColor(.red)
-                    Text("Expires: \(expiresAt, formatter: dateFormatter)")
+                HStack {
+                    HStack(spacing: 4) {
+                        Image(systemName: "calendar")
+                            .foregroundColor(.red)
+                        Text("Expires: \(expiresAt, formatter: dateFormatter)")
+                            .font(.caption)
+                            .foregroundColor(isExpiringSoon(expiresAt) ? .red : .secondary)
+                    }
+                    Spacer()
+                    Text(remainingDaysText(expiresAt))
                         .font(.caption)
                         .foregroundColor(isExpiringSoon(expiresAt) ? .red : .secondary)
                 }
@@ -319,5 +325,18 @@ struct StatsCardView: View {
     private func isExpiringSoon(_ date: Date) -> Bool {
         let daysUntilExpiry = Calendar.current.dateComponents([.day], from: Date(), to: date).day ?? 0
         return daysUntilExpiry <= 7
+    }
+    
+    private func remainingDaysText(_ date: Date) -> String {
+        let days = Calendar.current.dateComponents([.day], from: Date(), to: date).day ?? 0
+        if days < 0 {
+            return "Expired"
+        } else if days == 0 {
+            return "Today"
+        } else if days == 1 {
+            return "1 day left"
+        } else {
+            return "\(days) days left"
+        }
     }
 }
