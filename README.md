@@ -1,4 +1,4 @@
-# CRS Quotio
+# CRS Quota
 
 Language: 🇺🇸 English | [🇨🇳 简体中文](./README.zh-CN.md)
 
@@ -27,7 +27,7 @@ A macOS menu bar app for monitoring CRS API usage quota.
 
 ## How to Run
 
-1. Open `crs-quotio.xcodeproj`
+1. Open `crs-quota.xcodeproj`
 2. Click **Run** (Cmd + R)
 3. Click the menu bar icon, go to Settings to add API configuration
 

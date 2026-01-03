@@ -1,4 +1,4 @@
-# CRS Quotio
+# CRS Quota
 
 Language: [🇺🇸 English](./README.md) | 🇨🇳 简体中文
 
@@ -27,7 +27,7 @@ macOS 菜单栏应用，用于监控 CRS API 使用额度。
 
 ## 如何运行
 
-1. 打开 `crs-quotio.xcodeproj`
+1. 打开 `crs-quota.xcodeproj`
 2. 点击 **Run** (Cmd + R)
 3. 点击菜单栏图标，进入 Settings 添加 API 配置
 

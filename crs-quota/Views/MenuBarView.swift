@@ -1,6 +1,6 @@
 //
 //  MenuBarView.swift
-//  crs-quotio
+//  crs-quota
 //
 
 import SwiftUI
