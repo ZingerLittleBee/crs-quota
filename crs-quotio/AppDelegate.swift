@@ -32,6 +32,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             .store(in: &cancellables)
         
+        // Observe config changes to auto refresh
+        ConfigManager.shared.$configs
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                Task {
+                    await self?.viewModel.refreshAll()
+                }
+            }
+            .store(in: &cancellables)
+        
         // Create popover
         popover = NSPopover()
         popover.contentSize = NSSize(width: 380, height: 500)
