@@ -45,11 +45,12 @@ struct SettingsView: View {
             } else {
                 List {
                     ForEach(configManager.configs) { config in
-                        ConfigRowView(config: config) {
+                        ConfigRowView(config: config, onEdit: {
                             editingConfig = config
-                        }
+                        }, onDelete: {
+                            configManager.removeConfig(id: config.id)
+                        })
                     }
-                    .onDelete(perform: configManager.removeConfig)
                 }
             }
             
@@ -85,6 +86,7 @@ struct SettingsView: View {
 struct ConfigRowView: View {
     let config: APIConfig
     let onEdit: () -> Void
+    let onDelete: () -> Void
     
     var body: some View {
         HStack {
@@ -112,6 +114,12 @@ struct ConfigRowView: View {
             
             Button(action: onEdit) {
                 Image(systemName: "pencil")
+            }
+            .buttonStyle(.borderless)
+            
+            Button(action: onDelete) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
             }
             .buttonStyle(.borderless)
         }
