@@ -44,3 +44,5 @@ Carthage/Build/
 
 # SwiftLint
 .swiftlint.yml
+
+.context

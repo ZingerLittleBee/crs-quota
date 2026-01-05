@@ -24,6 +24,7 @@ struct APIConfig: Identifiable, Codable, Hashable {
 struct APIStatsResponse: Codable {
     let success: Bool
     let data: APIStatsData?
+    let message: String?
 }
 
 struct APIStatsData: Codable {
@@ -79,6 +80,7 @@ struct ModelStatsResponse: Codable {
     let success: Bool
     let data: [ModelStatsData]?
     let period: String?
+    let message: String?
 }
 
 struct ModelStatsData: Codable {
