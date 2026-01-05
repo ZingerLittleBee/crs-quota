@@ -54,28 +54,46 @@ class APIService {
         }
 
         return try await withRetry {
-            var request = URLRequest(url: url, timeoutInterval: self.requestTimeout)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            do {
+                var request = URLRequest(url: url, timeoutInterval: self.requestTimeout)
+                request.httpMethod = "POST"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-            let body = ["apiId": config.apiId]
-            request.httpBody = try JSONEncoder().encode(body)
+                let body = ["apiId": config.apiId]
+                request.httpBody = try JSONEncoder().encode(body)
 
-            let (data, response) = try await URLSession.shared.data(for: request)
+                let (data, response) = try await URLSession.shared.data(for: request)
 
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
-                throw APIError.requestFailed
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.requestFailed
+                }
+                
+                guard httpResponse.statusCode == 200 else {
+                    let bodyString = String(data: data, encoding: .utf8)
+                    throw APIError.httpError(statusCode: httpResponse.statusCode, body: bodyString)
+                }
+
+                let decoder = JSONDecoder()
+                let result = try decoder.decode(APIStatsResponse.self, from: data)
+
+                guard result.success, let statsData = result.data else {
+                    if let message = result.message {
+                        throw APIError.businessError(message)
+                    }
+                    throw APIError.invalidResponse
+                }
+
+                return statsData
+            } catch let error as APIError {
+                throw error
+            } catch let error as URLError {
+                if error.code == .timedOut {
+                    throw APIError.timeout
+                }
+                throw APIError.networkError(code: error.code.rawValue)
+            } catch {
+                throw error
             }
-
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(APIStatsResponse.self, from: data)
-
-            guard result.success, let statsData = result.data else {
-                throw APIError.invalidResponse
-            }
-
-            return statsData
         }
     }
     
@@ -85,33 +103,55 @@ class APIService {
         }
 
         return try await withRetry {
-            var request = URLRequest(url: url, timeoutInterval: self.requestTimeout)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            do {
+                var request = URLRequest(url: url, timeoutInterval: self.requestTimeout)
+                request.httpMethod = "POST"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-            struct ModelStatsRequest: Encodable {
-                let apiId: String
-                let period: String
+                struct ModelStatsRequest: Encodable {
+                    let apiId: String
+                    let period: String
+                }
+
+                let body = ModelStatsRequest(apiId: config.apiId, period: "daily")
+                request.httpBody = try JSONEncoder().encode(body)
+
+                let (data, response) = try await URLSession.shared.data(for: request)
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.requestFailed
+                }
+                
+                guard httpResponse.statusCode == 200 else {
+                    let bodyString = String(data: data, encoding: .utf8)
+                    throw APIError.httpError(statusCode: httpResponse.statusCode, body: bodyString)
+                }
+
+                let decoder = JSONDecoder()
+                let result = try decoder.decode(ModelStatsResponse.self, from: data)
+
+                guard result.success else {
+                    if let message = result.message {
+                        throw APIError.businessError(message)
+                    }
+                    throw APIError.invalidResponse
+                }
+                
+                guard let models = result.data else {
+                    return 0
+                }
+
+                return models.reduce(0) { $0 + $1.allTokens }
+            } catch let error as APIError {
+                throw error
+            } catch let error as URLError {
+                if error.code == .timedOut {
+                    throw APIError.timeout
+                }
+                throw APIError.networkError(code: error.code.rawValue)
+            } catch {
+                throw error
             }
-
-            let body = ModelStatsRequest(apiId: config.apiId, period: "daily")
-            request.httpBody = try JSONEncoder().encode(body)
-
-            let (data, response) = try await URLSession.shared.data(for: request)
-
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
-                throw APIError.requestFailed
-            }
-
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(ModelStatsResponse.self, from: data)
-
-            guard result.success, let models = result.data else {
-                return 0
-            }
-
-            return models.reduce(0) { $0 + $1.allTokens }
         }
     }
 }
@@ -120,15 +160,30 @@ enum APIError: Error, LocalizedError {
     case invalidURL
     case requestFailed
     case invalidResponse
+    case httpError(statusCode: Int, body: String?)
+    case networkError(code: Int)
+    case timeout
+    case businessError(String)
     
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid URL"
+            return "无效的 URL"
         case .requestFailed:
-            return "Request failed"
+            return "请求失败"
         case .invalidResponse:
-            return "Invalid response"
+            return "无效的响应"
+        case .httpError(let statusCode, let body):
+            if let body = body, !body.isEmpty {
+                return body
+            }
+            return "HTTP 错误: \(statusCode)"
+        case .networkError(let code):
+            return "网络错误: \(code)"
+        case .timeout:
+            return "请求超时"
+        case .businessError(let message):
+            return message
         }
     }
 }
