@@ -158,7 +158,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func showSettings() {
         if settingsWindow == nil {
-            let settingsView = SettingsView()
+            let settingsView = SettingsViewWrapper()
             let hostingController = NSHostingController(rootView: settingsView)
             
             settingsWindow = NSWindow(contentViewController: hostingController)

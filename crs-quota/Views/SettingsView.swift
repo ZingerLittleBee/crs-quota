@@ -5,8 +5,10 @@
 
 import SwiftUI
 
+@available(macOS 13.0, *)
 struct SettingsView: View {
     @ObservedObject var configManager = ConfigManager.shared
+    @ObservedObject var launchAtLoginManager = LaunchAtLoginManager.shared
     @Environment(\.dismiss) var dismiss
     
     @State private var showAddSheet = false
@@ -58,6 +60,80 @@ struct SettingsView: View {
             
             // Footer
             HStack {
+                Toggle("Launch at Login", isOn: $launchAtLoginManager.isEnabled)
+                    .toggleStyle(.checkbox)
+                Spacer()
+                Button("Done") {
+                    dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding()
+        }
+        .frame(width: 450, height: 400)
+        .sheet(isPresented: $showAddSheet) {
+            ConfigEditView(config: nil) { newConfig in
+                configManager.addConfig(newConfig)
+            }
+        }
+        .sheet(item: $editingConfig) { config in
+            ConfigEditView(config: config) { updatedConfig in
+                configManager.updateConfig(updatedConfig)
+            }
+        }
+    }
+}
+
+struct SettingsViewLegacy: View {
+    @ObservedObject var configManager = ConfigManager.shared
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var showAddSheet = false
+    @State private var editingConfig: APIConfig?
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("API Settings")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                Spacer()
+                Button(action: { showAddSheet = true }) {
+                    Image(systemName: "plus")
+                }
+                .buttonStyle(.borderless)
+            }
+            .padding()
+            
+            Divider()
+            
+            if configManager.configs.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "server.rack")
+                        .font(.system(size: 40))
+                        .foregroundColor(.secondary)
+                    Text("No API endpoints configured")
+                        .foregroundColor(.secondary)
+                    Button("Add API Endpoint") {
+                        showAddSheet = true
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List {
+                    ForEach(configManager.configs) { config in
+                        ConfigRowView(config: config, onEdit: {
+                            editingConfig = config
+                        }, onDelete: {
+                            configManager.removeConfig(id: config.id)
+                        })
+                    }
+                }
+            }
+            
+            Divider()
+            
+            HStack {
                 Text("\(configManager.configs.count) endpoint(s)")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -79,6 +155,16 @@ struct SettingsView: View {
             ConfigEditView(config: config) { updatedConfig in
                 configManager.updateConfig(updatedConfig)
             }
+        }
+    }
+}
+
+struct SettingsViewWrapper: View {
+    var body: some View {
+        if #available(macOS 13.0, *) {
+            SettingsView()
+        } else {
+            SettingsViewLegacy()
         }
     }
 }
@@ -238,5 +324,5 @@ struct ConfigEditView: View {
 }
 
 #Preview {
-    SettingsView()
+    SettingsViewWrapper()
 }
