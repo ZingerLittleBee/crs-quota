@@ -237,7 +237,25 @@ struct StatsCardView: View {
                         .tint(progress > 0.8 ? .red : (progress > 0.5 ? .orange : .green))
                 }
             }
-            
+
+            // Weekly Opus limit progress
+            if data.limits.weeklyOpusCostLimit > 0 {
+                let weeklyProgress = min(data.limits.weeklyOpusCost / data.limits.weeklyOpusCostLimit, 1.0)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack {
+                        Text("Weekly Limit")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(String(format: "$%.2f / $%.0f", data.limits.weeklyOpusCost, data.limits.weeklyOpusCostLimit))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    ProgressView(value: weeklyProgress)
+                        .tint(weeklyProgress > 0.8 ? .red : (weeklyProgress > 0.5 ? .orange : .green))
+                }
+            }
+
             Divider()
             
             // Tokens

@@ -21,6 +21,7 @@ A macOS menu bar app for monitoring claude-relay-service API usage quota.
 - User name, account status
 - Total cost / Today's cost
 - Daily limit progress bar
+- Weekly limit progress bar (if available)
 - Total tokens / Today's tokens
 - Concurrency limit, expiration date and remaining days
 
